@@ -36,26 +36,69 @@ add USB.
 Zephyr's configuration system is more complex than I expect to be useful, so I
 plan to bypass some of it if I can. Specifically, if possible, I hope to use
 the Rust drivers with a C FFI wrapper. To the extent that using Zephyr's
-typical Device Tree Macros gets in the way of using the Rust drivers, I hope to
+typical Device Tree macros gets in the way of using the Rust drivers, I hope to
 bypass the Device Tree stuff.
 
 
-## Docs & Refs
+## Pinout & Electrical Ratings
+
+- Bunnie says the GPIO uses a 22 nm cell that can do **3.3V** IO with **12mA**
+  current drive and **2kV HBM** ESD protection.
+
+- ️⚡️🔥☠️ **DO NOT USE 5V**. IO is not 5V tolerant.
+
+- Dabao v3 schematic:
+  [github.com/baochip/dabao/blob/main/dabao_v3c.pdf](https://github.com/baochip/dabao/blob/main/dabao_v3c.pdf)
+
+- Bootloader (boot1) serial console: **TX=PB14**, **RX=PB13**, 1M baud 8N1<br>
+  (source [README-baochip.md](https://github.com/betrusted-io/xous-core/blob/main/README-baochip.md))
 
 
-### Dev Tools
+## Serial Debug Console
 
-- ⚠️ Updating Dabao Bootloader:
+1. Solder 2.54mm header pins to your Dabao so you can put it in a breadboard.
+
+2. Find a fast USB serial adapter that supports 1 Mbps. FTDI adapters are
+   probably your best bet. CP2102 adapters might work (max baud 1M), but newer
+   CP2102N adapters are probably better (max baud 3M). Many common serial
+   adapters use unsuitable chipsets. For example, the Raspberry Pi Debug Probe
+   won't work as the RP2040 tops out at 926.1 kbps.
+
+3. Serial Console Wiring:
+
+   | FTDI Adapter | Dabao     |
+   | ------------ | --------- |
+   | TX           | PB13 (RX) |
+   | RX           | PB14 (TX) |
+   | GND          | GND       |
+
+
+## Docs, Refs, and Downloads
+
+
+### Dabao Board (Bao1x dev board)
+
+- ⚠️ The first batch of boards (e.g. from 39C3) shipped with alpha firmware
+  that must be updated.
+
+  **Dabao Bootloader Update Instructions**:
   [xous-core/README-baochip.md](https://github.com/betrusted-io/xous-core/blob/main/README-baochip.md)
 
+  The bootloader update instructions describe building `bao1x-alt-boot1.uf2`
+  and `bao1x-boot1.uf2` from source, but you can also get them from bunnie's CI
+  builds at
+  [ci.betrusted.io/latest-ci/baochip/bootloader/](https://ci.betrusted.io/latest-ci/baochip/bootloader/)
 
-### Bao1x
+- Board design files: [github.com/baochip/dabao](https://github.com/baochip/dabao)
+
+
+### Bao1x Chip (CSP Package)
 
 These notes and documentation links should help understand peripheral IP blocks
 used in the Bao1x SoC. Much of this came from the baochip discord server's
 not-rust channel.
 
-- Baochip website with assorted top-level links: https://baochip.com
+- Baochip website with various docs links: [baochip.com](https://baochip.com)
 
 - uDMA block is from Pulp platform from University of Bologna/ETH Zurich:<br>
   [docs](https://docs.openhwgroup.org/projects/core-v-mcu/doc-src/udma_subsystem.html),
