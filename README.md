@@ -54,14 +54,21 @@ bypass the Device Tree stuff.
   (source [README-baochip.md](https://github.com/betrusted-io/xous-core/blob/main/README-baochip.md))
 
 
-## Debug Serial Port (Debug Logging)
+## UART Serial Console
 
 ⚠️ Using **macOS** `screen -fn /dev/tty.usb... 1000000` to get a 1 Mbps serial
 monitor **won't work** because macOS screen doesn't know how to set
 non-standard baud rates. The **easy fix is use Linux**. If you REALLY want to
 use macOS, you'll need to find a program that can use the IOSSIOSPEED ioctl to
 set non-standard baud rates. The paid "Serial" app on the macOS App Store might
-work.
+work. NOTE: This is only an issue for UART serial. USB CDC serial is different.
+
+You might wonder, why 1M instead of 115200 or whatever? Some benefits:
+
+- Faster baud rate means faster boot times without sacrificing logging detail.
+
+- 1M is easy to derive with low error by dividing down the system clock, while
+  legacy baud rates require PLL scaling that gets jittery as you go faster.
 
 To read debug serial port log messages:
 
@@ -91,11 +98,103 @@ To read debug serial port log messages:
 5. Connect Dabao to USB. You should see `boot0 console up` and so on.
 
 
-## USB CDC Serial (Bootloader Shell, etc.)
+### Boot Messages Example: USB Host
 
-The bootloader and baremetal app both provide a simple shell interface, **but**
-you can only get to it from the USB CDC serial port. For boot1 and baremetal,
-the debug serial port just shows log messages.
+A typical boot when plugged into a USB host (computer) might look like this:
+
+```
+boot0 console up
+
+~~boot0 up! (v0.9.16-1881-g3e4b0b657)~~
+
+boot0 console up
+
+~~boot0 up! (v0.9.16-1881-g3e4b0b657)~~
+
+boot1 udma console up, CPU @ 350MHz!
+
+~~Boot1 up! (v0.9.16-2542-g944a8082e: Towards Beta-0)~~
+
+Configured board type: Dabao
+Boot bypassed because bootwait was enabled
+USB device ready
+USB is connected!
+```
+
+Note the `USB is connected!` on the last line.
+
+
+### Boot Messages Example: USB Power Only
+
+A typical boot when only connected to USB power might look like this:
+```
+boot0 console up
+
+~~boot0 up! (v0.9.16-1881-g3e4b0b657)~~
+
+boot0 console up
+
+~~boot0 up! (v0.9.16-1881-g3e4b0b657)~~
+
+boot1 udma console up, CPU @ 350MHz!
+
+~~Boot1 up! (v0.9.16-2542-g944a8082e: Towards Beta-0)~~
+
+Configured board type: Dabao
+Boot bypassed because bootwait was enabled
+USB device ready
+```
+
+Note the absence of `USB is connected!` for the last line. Here, the bootloader
+shell is bound to the UART port. If you press the enter key, you should see
+something like:
+
+```
+
+Command not recognized:
+Commands include: reset, echo, altboot, boot, bootwait, idmode, localecho, uf2, boardtype, audit, lockdown, paranoid, self_destruct
+```
+
+Then, if you type `audit` + enter, you should see something like this:
+
+```
+audit
+Board type reads as: Dabao
+Boot partition is: Ok(PrimaryPartition)
+Semver is: v0.9.16-2542-g944a8082e
+Description is: Towards Beta-0
+Device serializer: xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx
+Public serial number: xxxxxx
+UUID: xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx
+Paranoid mode: 0/0
+Possible attack attempts: 0
+Revocations:
+Stage       key0     key1     key2     key3
+boot0       enabled  enabled  enabled  enabled
+boot1       enabled  enabled  enabled  enabled
+next stage  enabled  enabled  enabled  enabled
+Boot0: key 1/1 (bao2) -> 60000000
+Boot1: key 3/3 (dev ) -> 60020000
+Next stage: key 3/3 (dev ) -> 60060000
+== BOOT1 FAILED PUBKEY CHECK ==
+== IN DEVELOPER MODE ==
+== BOOT1 REPORTED PUBKEY CHECK FAILURE ==
+In-system keys have been generated
+** System did not meet minimum requirements for security **
+```
+
+
+## USB CDC Serial Console
+
+The bootloader and baremetal app both provide a simple shell interface. The
+boot log messages always go to the UART serial port, but the shell binding
+depends on whether the USB port is connected to power only or to a USB host:
+
+- Connected to Power Only: Shell binding goes to UART serial port. In this
+  case, the last UART log line is `USB device ready` (not `...connected!`).
+
+- Connected to Computer (USB host): Shell binding goes to USB CDC serial port.
+  In this case, the last UART log line should be `USB is connected!`.
 
 
 ## Docs, Refs, and Downloads
