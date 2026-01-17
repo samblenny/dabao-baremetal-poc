@@ -7,17 +7,16 @@ Usage:
 
     python3 signer.py <presign-in.img> <signed-out.uf2>
 
-
 This is a re-implimentation of xous-core/tools/src/bin/sign_image.rs intended
 to facilitate bare metal development for Baochip free of Xous dependencies.
 
-To run this with Debian system packages only (no pip/pypi stuff), do:
+To run this, you need a recent version of libsodium, on Debian you can do:
 
-    sudo apt install python3-libnacl
+    sudo apt install libsodium-dev
 
 """
 import base64
-import ctypes
+import ctypes  # used for ctypes.CDLL("libsodium.so")
 import os
 import sys
 import struct
