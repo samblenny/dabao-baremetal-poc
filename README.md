@@ -1,43 +1,53 @@
 <!-- SPDX-License-Identifier: MIT -->
 <!-- SPDX-FileCopyrightText: Copyright 2026 Sam Blenny -->
-# Dabao Zephyr CircuitPython PoC
+# Dabao Baremetal PoC
 
 **DRAFT: WORK IN PROGRESS**
 
 [*an aspirational blurb about what this is trying to be*:]
 
-This is a proof of concept for building CircuitPython's Zephyr port to run on
-the Baochip Dabao board. Most of the work here is about getting Rust no_std
-device drivers from the Dabao bootloader to work as Zephyr drivers. There's
-some additional stuff for getting the CircuitPython Zephyr port to build with
-my Zephyr board definition for Dabao.
+This is a proof of concept for a C-friendly baremetal SDK to run on the Baochip
+Dabao evaluation board. Most of the work here is about drivers for the Bao1x
+peripherals. I plan to start from the xous-core repo's bao1x bootloader's
+no_std Rust drivers and work toward something more C-friendly.
 
-**CAUTION:**
+Previously, I said I wanted this to be a Zephyr + CircuitPython port for Dabao.
+After further consideration, I changed my mind and scoped this down to just
+making an SDK with some examples and documentation. If I end up working on a
+CircuitPython port, that will happen later, in a separate project.
 
-1. This is a proof of concept. I don't currently have any intention to maintain
-   this once I've got it working. The point is to document how to do it.
-
-2. The Zephyr Project has strict contribution policies which I am not
-   following. Commits in this repo are unsuitable for upstreaming. But...
-
-3. I'm arranging things here to hopefully facilitate easy re-implementation or
-   translation of my work (e.g. Rust to C with a new copyright). If you want to
-   do that and follow the Zephyr Project upstreaming policies, go for it. Best
-   of luck.
+**CAUTION:** This is a proof of concept. I don't currently plan to maintain
+this code once I've got it working. The point is to document how to do it.
 
 
-## Goals & Strategy
+## Goals
 
-What I care about here is getting to the point of CircuitPython running on a
-Dabao board by the most straightforward path which seems reasonable and in good
-taste. Plan is CPU, ReRAM, RAM, LED blinky, and UART serial first, then maybe
-add USB.
+1. Create a lightweight SDK to facilitate Dabao board initialization and
+   peripheral access for timers, GPIO, UART, I2C, SPI, TRNG, USB, and so on.
 
-Zephyr's configuration system is more complex than I expect to be useful, so I
-plan to bypass some of it if I can. Specifically, if possible, I hope to use
-the Rust drivers with a C FFI wrapper. To the extent that using Zephyr's
-typical Device Tree macros gets in the way of using the Rust drivers, I hope to
-bypass the Device Tree stuff.
+2. Provide an API that could potentially be used to implement board support for
+   Arduino, CircuitPython, Lua, MicroPython, Zephyr, or whatever.
+
+
+## Strategy
+
+The Plan:
+
+1. Document bao1x bootloader requirements for signed UF2 firmware images.
+
+2. Write Python tooling to create signed UF2 firmware images. The point of this
+   is to allow for a dev workflow that doesn't depend on Rust tools from the
+   xous-core repo.
+
+3. Get simple examples working with Rust code (blinky, hello world, etc) by
+   adapting peripheral drivers from the Dabao bootloader (from xous-core).
+
+4. Get simple examples working with C code by either wrapping the Rust drivers
+   in a C FFI or reimplementing the drivers in C.
+
+5. Once I have good serial console support working, implement more peripheral
+   support (I2C sensors, SPI displays, USB, etc).
+
 
 
 ## Pinout & Electrical Ratings
@@ -262,38 +272,6 @@ not-rust channel.
 
   Current no_std BIO drivers:
   [xous-core/libs/bao1x-hal/src/bio_hw.rs](https://github.com/betrusted-io/xous-core/blob/main/libs/bao1x-hal/src/bio_hw.rs)
-
-
-### CircuitPython
-
-- [circuitpython/ports/zephyr-cp/README.md](https://github.com/adafruit/circuitpython/blob/main/ports/zephyr-cp/README.md)
-  explains how to install and build the CircuitPython Zephyr port
-
-- CircuitPython Zephyr port build tools:
-  [ports/zephyr-cp/cptools](https://github.com/adafruit/circuitpython/tree/main/ports/zephyr-cp/cptools)
-
-  See [zephyr2cp.py](https://github.com/adafruit/circuitpython/blob/main/ports/zephyr-cp/cptools/zephyr2cp.py)
-for details of how CircuitPython extracts pin mappings from Device Tree config)
-
-
-### Zephyr
-
-These are for implementing Zephyr drivers, board definitions, etc.
-
-- [How to Build Drivers for Zephyr RTOS](https://www.zephyrproject.org/how-to-build-drivers-for-zephyr-rtos/)
-  (Zephyr Project blog, August 11, 2020)
-
-- [LiteX VexRiscv](https://docs.zephyrproject.org/latest/boards/enjoydigital/litex_vexriscv/doc/index.html)
-  board definition
-
-- UART driver samples (github):
-  [zephyr/samples/uart/](https://github.com/zephyrproject-rtos/zephyr/tree/main/samples/drivers/uart)
-
-- Zephyr Project
-  [UART API docs](https://docs.zephyrproject.org/latest/hardware/peripherals/uart.html)
-
-- Zephyr Project
-  [GPIO API docs](https://docs.zephyrproject.org/latest/hardware/peripherals/gpio.html)
 
 
 ## Notes from Xous Docs
