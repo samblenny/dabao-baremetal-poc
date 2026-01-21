@@ -457,14 +457,14 @@ blob contains:
 1. A header, beginning with a jump instruction, that's sufficient to
    reconstruct statics from the `.data` section. This is a method to compress
    `.data`, which typically has many zero bytes. This matters particularly for
-   the bootloaders, which are space constrained to fit in small RRAM slots.
+   the bootloaders, which are space constrained to fit in small ReRAM slots.
 
 2. The `.text` section with executable code (assembly and compiled rust code).
    This begins with init code to set up hardware, prepare the `.data` section
-   in RAM, zero the `.bss` section in RAM, configure interrupt and trap
+   in SRAM, zero the `.bss` section in SRAM, configure interrupt and trap
    handlers, set the stack pointer, and jump to `_start`.
 
-3. The `.rodata` section with read-only data that stays in RRAM (flash).
+3. The `.rodata` section with read-only data that stays in ReRAM (flash).
 
 For my purposes, compressing `.data` is probably not necessary. But, my code in
 `.text` will still be responsible for initializing `.data` and `.bss` by some
@@ -487,7 +487,7 @@ For early hardware setup, including IRQs, see:
 - [xous-core/baremetal/src/platform/bao1x/irq.rs](https://github.com/betrusted-io/xous-core/blob/d26ce7fbf11fef8aac24adea93f557341dd0600f/baremetal/src/platform/bao1x/irq.rs#L10-L28)
 
 Bunnie says, when the Bao1x bootloader jumps to the initial JAL instruction at
-the start of the signed blob in RRAM, interrupts are guaranteed to be off.
+the start of the signed blob in ReRAM, interrupts are guaranteed to be off.
 Also, at that point, the UDMA UART baud rate, buffers, and clocks will be set
 up and ready to use (but it's best to re-initialize them anyway).
 
@@ -506,7 +506,7 @@ Some relevant UDMA UART code snippets from xous-core:
   [xous-core/libs/bao1x-hal/src/udma/mod.rs#L253-L274](https://github.com/betrusted-io/xous-core/blob/main/libs/bao1x-hal/src/udma/mod.rs#L253-L274)
 
 **CAUTION:** The UDMA engine expects its source data to come from the IFRAM
-buffers, **which are outside the regular RAM**. The IFRAM address space is a
+buffers, **which are outside the regular SRAM**. The IFRAM address space is a
 totally different thing, a 256kB region of buffers mapped to its own address
 range starting at 0x50000000.
 
