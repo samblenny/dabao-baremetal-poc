@@ -81,37 +81,43 @@ pub const PC13: u16 = 1 << 13;
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_read_output_b() -> u16 {
+pub unsafe fn read_output_b() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOOUT_B) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_output_b(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOOUT_B, value); }
+pub unsafe fn write_output_b(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOOUT_B, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_oe_b() -> u16 {
+pub unsafe fn read_oe_b() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOOE_B) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_oe_b(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOOE_B, value); }
+pub unsafe fn write_oe_b(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOOE_B, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_pu_b() -> u16 {
+pub unsafe fn read_pu_b() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOPU_B) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_pu_b(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOPU_B, value); }
+pub unsafe fn write_pu_b(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOPU_B, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_input_b() -> u16 {
+pub unsafe fn read_input_b() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOIN_B) }
 }
 
@@ -120,37 +126,43 @@ pub unsafe fn gpio_read_input_b() -> u16 {
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_read_output_c() -> u16 {
+pub unsafe fn read_output_c() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOOUT_C) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_output_c(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOOUT_C, value); }
+pub unsafe fn write_output_c(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOOUT_C, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_oe_c() -> u16 {
+pub unsafe fn read_oe_c() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOOE_C) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_oe_c(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOOE_C, value); }
+pub unsafe fn write_oe_c(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOOE_C, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_pu_c() -> u16 {
+pub unsafe fn read_pu_c() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOPU_C) }
 }
 
 #[inline]
-pub unsafe fn gpio_write_pu_c(value: u16) {
-    unsafe { core::ptr::write_volatile(GPIOPU_C, value); }
+pub unsafe fn write_pu_c(value: u16) {
+    unsafe {
+        core::ptr::write_volatile(GPIOPU_C, value);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_read_input_c() -> u16 {
+pub unsafe fn read_input_c() -> u16 {
     unsafe { core::ptr::read_volatile(GPIOIN_C) }
 }
 
@@ -159,7 +171,7 @@ pub unsafe fn gpio_read_input_c() -> u16 {
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_set_bits_b(mask: u16) {
+pub unsafe fn set_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_B);
         core::ptr::write_volatile(GPIOOUT_B, current | mask);
@@ -167,7 +179,7 @@ pub unsafe fn gpio_set_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_bits_b(mask: u16) {
+pub unsafe fn clear_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_B);
         core::ptr::write_volatile(GPIOOUT_B, current & !mask);
@@ -175,7 +187,7 @@ pub unsafe fn gpio_clear_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_toggle_bits_b(mask: u16) {
+pub unsafe fn toggle_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_B);
         core::ptr::write_volatile(GPIOOUT_B, current ^ mask);
@@ -183,7 +195,7 @@ pub unsafe fn gpio_toggle_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_set_oe_bits_b(mask: u16) {
+pub unsafe fn set_oe_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOE_B);
         core::ptr::write_volatile(GPIOOE_B, current | mask);
@@ -191,7 +203,7 @@ pub unsafe fn gpio_set_oe_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_oe_bits_b(mask: u16) {
+pub unsafe fn clear_oe_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOE_B);
         core::ptr::write_volatile(GPIOOE_B, current & !mask);
@@ -199,7 +211,7 @@ pub unsafe fn gpio_clear_oe_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_set_pu_bits_b(mask: u16) {
+pub unsafe fn set_pu_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOPU_B);
         core::ptr::write_volatile(GPIOPU_B, current | mask);
@@ -207,7 +219,7 @@ pub unsafe fn gpio_set_pu_bits_b(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_pu_bits_b(mask: u16) {
+pub unsafe fn clear_pu_bits_b(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOPU_B);
         core::ptr::write_volatile(GPIOPU_B, current & !mask);
@@ -219,7 +231,7 @@ pub unsafe fn gpio_clear_pu_bits_b(mask: u16) {
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_set_bits_c(mask: u16) {
+pub unsafe fn set_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_C);
         core::ptr::write_volatile(GPIOOUT_C, current | mask);
@@ -227,7 +239,7 @@ pub unsafe fn gpio_set_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_bits_c(mask: u16) {
+pub unsafe fn clear_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_C);
         core::ptr::write_volatile(GPIOOUT_C, current & !mask);
@@ -235,7 +247,7 @@ pub unsafe fn gpio_clear_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_toggle_bits_c(mask: u16) {
+pub unsafe fn toggle_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOUT_C);
         core::ptr::write_volatile(GPIOOUT_C, current ^ mask);
@@ -243,7 +255,7 @@ pub unsafe fn gpio_toggle_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_set_oe_bits_c(mask: u16) {
+pub unsafe fn set_oe_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOE_C);
         core::ptr::write_volatile(GPIOOE_C, current | mask);
@@ -251,7 +263,7 @@ pub unsafe fn gpio_set_oe_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_oe_bits_c(mask: u16) {
+pub unsafe fn clear_oe_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOOE_C);
         core::ptr::write_volatile(GPIOOE_C, current & !mask);
@@ -259,7 +271,7 @@ pub unsafe fn gpio_clear_oe_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_set_pu_bits_c(mask: u16) {
+pub unsafe fn set_pu_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOPU_C);
         core::ptr::write_volatile(GPIOPU_C, current | mask);
@@ -267,7 +279,7 @@ pub unsafe fn gpio_set_pu_bits_c(mask: u16) {
 }
 
 #[inline]
-pub unsafe fn gpio_clear_pu_bits_c(mask: u16) {
+pub unsafe fn clear_pu_bits_c(mask: u16) {
     unsafe {
         let current = core::ptr::read_volatile(GPIOPU_C);
         core::ptr::write_volatile(GPIOPU_C, current & !mask);
@@ -279,44 +291,54 @@ pub unsafe fn gpio_clear_pu_bits_c(mask: u16) {
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_set_output_b(pin_mask: u16) {
-    unsafe { gpio_set_oe_bits_b(pin_mask); }
-}
-
-#[inline]
-pub unsafe fn gpio_set_input_floating_b(pin_mask: u16) {
+pub unsafe fn set_output_b(pin_mask: u16) {
     unsafe {
-        gpio_clear_oe_bits_b(pin_mask);
-        gpio_clear_pu_bits_b(pin_mask);
+        set_oe_bits_b(pin_mask);
     }
 }
 
 #[inline]
-pub unsafe fn gpio_set_input_pullup_b(pin_mask: u16) {
+pub unsafe fn set_input_floating_b(pin_mask: u16) {
     unsafe {
-        gpio_clear_oe_bits_b(pin_mask);
-        gpio_set_pu_bits_b(pin_mask);
+        clear_oe_bits_b(pin_mask);
+        clear_pu_bits_b(pin_mask);
     }
 }
 
 #[inline]
-pub unsafe fn gpio_set_open_drain_b(pin_mask: u16) {
-    unsafe { gpio_set_oe_bits_b(pin_mask); }
+pub unsafe fn set_input_pullup_b(pin_mask: u16) {
+    unsafe {
+        clear_oe_bits_b(pin_mask);
+        set_pu_bits_b(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_set_high_b(pin_mask: u16) {
-    unsafe { gpio_set_bits_b(pin_mask); }
+pub unsafe fn set_open_drain_b(pin_mask: u16) {
+    unsafe {
+        set_oe_bits_b(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_set_low_b(pin_mask: u16) {
-    unsafe { gpio_clear_bits_b(pin_mask); }
+pub unsafe fn set_high_b(pin_mask: u16) {
+    unsafe {
+        set_bits_b(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_toggle_b(pin_mask: u16) {
-    unsafe { gpio_toggle_bits_b(pin_mask); }
+pub unsafe fn set_low_b(pin_mask: u16) {
+    unsafe {
+        clear_bits_b(pin_mask);
+    }
+}
+
+#[inline]
+pub unsafe fn toggle_b(pin_mask: u16) {
+    unsafe {
+        toggle_bits_b(pin_mask);
+    }
 }
 
 // ============================================================================
@@ -324,42 +346,52 @@ pub unsafe fn gpio_toggle_b(pin_mask: u16) {
 // ============================================================================
 
 #[inline]
-pub unsafe fn gpio_set_output_c(pin_mask: u16) {
-    unsafe { gpio_set_oe_bits_c(pin_mask); }
-}
-
-#[inline]
-pub unsafe fn gpio_set_input_floating_c(pin_mask: u16) {
+pub unsafe fn set_output_c(pin_mask: u16) {
     unsafe {
-        gpio_clear_oe_bits_c(pin_mask);
-        gpio_clear_pu_bits_c(pin_mask);
+        set_oe_bits_c(pin_mask);
     }
 }
 
 #[inline]
-pub unsafe fn gpio_set_input_pullup_c(pin_mask: u16) {
+pub unsafe fn set_input_floating_c(pin_mask: u16) {
     unsafe {
-        gpio_clear_oe_bits_c(pin_mask);
-        gpio_set_pu_bits_c(pin_mask);
+        clear_oe_bits_c(pin_mask);
+        clear_pu_bits_c(pin_mask);
     }
 }
 
 #[inline]
-pub unsafe fn gpio_set_open_drain_c(pin_mask: u16) {
-    unsafe { gpio_set_oe_bits_c(pin_mask); }
+pub unsafe fn set_input_pullup_c(pin_mask: u16) {
+    unsafe {
+        clear_oe_bits_c(pin_mask);
+        set_pu_bits_c(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_set_high_c(pin_mask: u16) {
-    unsafe { gpio_set_bits_c(pin_mask); }
+pub unsafe fn set_open_drain_c(pin_mask: u16) {
+    unsafe {
+        set_oe_bits_c(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_set_low_c(pin_mask: u16) {
-    unsafe { gpio_clear_bits_c(pin_mask); }
+pub unsafe fn set_high_c(pin_mask: u16) {
+    unsafe {
+        set_bits_c(pin_mask);
+    }
 }
 
 #[inline]
-pub unsafe fn gpio_toggle_c(pin_mask: u16) {
-    unsafe { gpio_toggle_bits_c(pin_mask); }
+pub unsafe fn set_low_c(pin_mask: u16) {
+    unsafe {
+        clear_bits_c(pin_mask);
+    }
+}
+
+#[inline]
+pub unsafe fn toggle_c(pin_mask: u16) {
+    unsafe {
+        toggle_bits_c(pin_mask);
+    }
 }

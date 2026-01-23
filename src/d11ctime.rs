@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright 2026 Sam Blenny
 //
-//! D11C heartbeat timer for bao1x dabao evaluation board
+//! D11CTIME heartbeat timer for bao1x dabao evaluation board
 //!
 //! Provides direct register access for the D11CTIME heartbeat timer.
 //!
 //! # Overview
 //!
-//! The D11C timer is a simple heartbeat timer that toggles a bit at a
+//! The D11CTIME timer is a simple heartbeat timer that toggles a bit at a
 //! fixed interval. It's useful for deterministic timing without delay loops.
 //!
 //! # Registers
@@ -43,29 +43,32 @@ pub const ACLK_FREQ_HZ: u32 = 350_000_000;
 /// Set this to the number of ACLK cycles for the desired interval.
 /// At 350 MHz, 350_000_000 = 1 second.
 #[inline]
-pub unsafe fn d11ctime_set_interval(cycles: u32) {
+pub unsafe fn set_interval(cycles: u32) {
     unsafe {
         core::ptr::write_volatile(CONTROL, cycles);
     }
 }
 
-/// Read the heartbeat register.
+/// Read the heartbeat bit.
 ///
-/// Returns the current value of the heartbeat register.
-/// Bit 0 toggles each time the interval expires.
+/// Returns the current state of bit 0 of the heartbeat register.
+/// Toggles each time the interval expires.
 #[inline]
-pub unsafe fn d11ctime_read_heartbeat() -> u32 {
-    unsafe {
-        core::ptr::read_volatile(HEARTBEAT)
-    }
+pub unsafe fn read_heartbeat() -> u32 {
+    unsafe { core::ptr::read_volatile(HEARTBEAT) & 1 }
 }
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-/// Calculate cycles for a given time interval in seconds
+/// Calculate ACLK cycles for a given time interval in milliseconds.
+///
+/// Returns the number of cycles needed for the specified millisecond
+/// interval. At 350 MHz, this provides 1 ms precision.
+///
+/// Example: millis_to_cycles(1000) = 350,000,000 (1 second)
 #[inline]
-pub const fn d11ctime_seconds_to_cycles(seconds: u32) -> u32 {
-    ACLK_FREQ_HZ * seconds
+pub const fn millis_to_cycles(millis: u32) -> u32 {
+    (ACLK_FREQ_HZ / 1000) * millis
 }
