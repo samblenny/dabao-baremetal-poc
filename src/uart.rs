@@ -125,6 +125,8 @@ pub fn init() {
         // Enable UART2 clock via uDMA control
         let cg = ptr::read_volatile(UDMA_REG_CG);
         ptr::write_volatile(UDMA_REG_CG, cg | UART2_CLK_BIT);
+        // Ensure clock enable completes before configuring UART
+        core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
 
         // Configure UART_SETUP for 8N1, 1 Mbps
         // The bootloader has already reset the UART, so we just configure it.
@@ -191,6 +193,8 @@ pub fn write(data: &[u8]) -> usize {
             TX_BLOCK_LEN[block] = offset as u8;
             // Next write() will use a fresh block
             TX_NEXT_BLOCK = (block + 1) % TX_BLOCK_COUNT;
+            // Ensure block state is visible to tick() before returning
+            core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::Release);
         }
 
         // If TX is idle, start DMA for any ready blocks
@@ -206,6 +210,7 @@ pub fn write(data: &[u8]) -> usize {
 ///
 /// Directly polls the VALID register. Returns Some(byte) if data is
 /// available, None otherwise. Non-blocking.
+#[inline]
 pub fn getc() -> Option<u8> {
     unsafe {
         if (ptr::read_volatile(REG_VALID) & VALID_DATA_AVAILABLE) != 0 {
@@ -225,6 +230,8 @@ pub fn getc() -> Option<u8> {
 /// by write() when needed.
 pub fn tick() {
     unsafe {
+        // Ensure we see the latest DMA state
+        core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::Acquire);
         // Check if current transfer is complete
         let tx_saddr = ptr::read_volatile(REG_TX_SADDR);
         if tx_saddr == 0 && TX_IN_FLIGHT {

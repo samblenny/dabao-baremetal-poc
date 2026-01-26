@@ -52,6 +52,8 @@ pub const ACLK_FREQ_HZ: u32 = 350_000_000;
 pub fn set_interval(cycles: u32) {
     unsafe {
         core::ptr::write_volatile(CONTROL, cycles);
+        // Ensure interval is set before timer starts operating
+        core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
     }
 }
 

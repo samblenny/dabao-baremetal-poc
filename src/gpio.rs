@@ -357,7 +357,6 @@ pub fn read_input(pin: GpioPin) -> u16 {
 /// This function is safe to call because the firmware runs single-threaded.
 /// Concurrent GPIO access from multiple threads would cause data races, but
 /// that is not possible in this environment.
-#[inline]
 pub fn set_alternate_function(pin: GpioPin, af: AF) {
     unsafe {
         let (port, mask) = gpio_pin_to_parts(pin);
@@ -387,5 +386,7 @@ pub fn set_alternate_function(pin: GpioPin, af: AF) {
         let mask_2bit = 0b11u16 << bit_pos;
         let new_val = (current & !mask_2bit) | ((af as u16) << bit_pos);
         core::ptr::write_volatile(reg, new_val);
+        // Ensure AF register is set before any GPIO configuration follows
+        core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
     }
 }

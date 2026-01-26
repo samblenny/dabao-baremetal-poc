@@ -28,6 +28,7 @@ blinky:
 	@echo '---'
 	@echo '# Packing signed blob as UF2:'
 	python3 uf2ify.py $(BLINKY).img $(BLINKY).uf2
+	cp $(BLINKY).uf2 examples/
 
 blinky-disassemble:
 	$(LLVM_BIN)/llvm-objdump -d $(BLINKY) | less
@@ -59,6 +60,7 @@ uart:
 	@echo '---'
 	@echo '# Packing signed blob as UF2:'
 	python3 uf2ify.py $(UART).img $(UART).uf2
+	cp $(UART).uf2 examples/
 
 uart-disassemble:
 	$(LLVM_BIN)/llvm-objdump -d $(UART) | less
