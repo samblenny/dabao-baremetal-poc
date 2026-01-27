@@ -7,6 +7,34 @@
 //! shells. TX uses buffered DMA transfers, RX uses direct polling via the
 //! VALID register.
 //!
+//! # Usage
+//!
+//! Configure GPIO pins as alternate function AF1, initialize UART, then
+//! read and echo characters:
+//!
+//! ```ignore
+//! use dabao_baremetal_poc::{gpio, uart};
+//! use gpio::{AF, GpioPin};
+//!
+//! fn main() {
+//!     // Configure UART2 pins
+//!     gpio::set_alternate_function(GpioPin::PortB(gpio::PB13), AF::AF1);
+//!     gpio::set_alternate_function(GpioPin::PortB(gpio::PB14), AF::AF1);
+//!
+//!     // Initialize UART
+//!     uart::init();
+//!
+//!     // Main loop: read a character and echo it back
+//!     uart::write(b"UART echo is ready\r\n");
+//!     loop {
+//!         if let Some(byte) = uart::getc() {
+//!             uart::write(&[byte]);
+//!         }
+//!         uart::tick();  // Service TX DMA queue
+//!     }
+//! }
+//! ```
+//!
 //! # Hardware Details
 //!
 //! UART2 is hardwired to GPIO pins:

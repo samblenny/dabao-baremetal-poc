@@ -3,18 +3,17 @@
 //
 #![no_std]
 #![no_main]
-
 extern crate dabao_baremetal_poc;
-
-use dabao_baremetal_poc::{d11ctime, gpio, uart};
+use dabao_baremetal_poc::{gpio, timer, uart};
 use gpio::{AF, GpioPin};
 
 /// UART example for bao1x dabao evaluation board
 ///
-/// Initializes UART2 and prints "hello, world!" each time the PROG button
-/// (PC13) is pressed. Uses d11ctime for debouncing and uart::tick() to
-/// service the DMA TX queue.
-
+/// Initializes UART2 and demonstrates the timer module by repeatedly
+/// printing "hello, world!" with the current millisecond timestamp
+/// (from the TICKTIMER peripheral). Waits for button press/release cycles
+/// on the PROG button (PC13) between prints, using timer::millis() for
+/// debouncing. Uses uart::tick() to service the DMA TX queue.
 #[unsafe(no_mangle)]
 pub extern "C" fn main() -> ! {
     // Configure PB13 and PB14 for UART2
@@ -29,39 +28,61 @@ pub extern "C" fn main() -> ! {
     // Initialize UART2
     uart::init();
 
-    // Set d11ctime for 20 ms debounce interval
-    d11ctime::set_interval(d11ctime::millis_to_cycles(20));
-
     loop {
-        // Print hello world
-        uart::write(b"hello, world!\r\n");
+        // Print message prefix
+        uart::write(b"hello, world! [millis() = ");
 
-        // Wait for d11ctime heartbeat to change (debounce)
-        let last_beat = d11ctime::read_heartbeat();
-        loop {
-            uart::tick();
-            let beat = d11ctime::read_heartbeat();
-            if beat != last_beat {
-                break;
-            }
-        }
+        // Get current time and convert to decimal string
+        let ms = timer::millis();
+        let mut buf = [0u8; 20];
+        let len = format_u64(ms, &mut buf);
+
+        // Print the decimal milliseconds and line ending
+        uart::write(&buf[..len]);
+        uart::write(b" ms]\r\n");
 
         // Wait until PC13 is high (button released)
-        loop {
+        while gpio::read_input(GpioPin::PortC(gpio::PC13)) == 0 {
             uart::tick();
-            let button_state = gpio::read_input(GpioPin::PortC(gpio::PC13));
-            if button_state != 0 {
-                break;
-            }
         }
+        debounce(10);
 
-        // Read PC13 until button is pressed (goes low)
-        loop {
+        // Wait until PC13 is low (button pressed)
+        while gpio::read_input(GpioPin::PortC(gpio::PC13)) != 0 {
             uart::tick();
-            let button_state = gpio::read_input(GpioPin::PortC(gpio::PC13));
-            if button_state == 0 {
-                break;
-            }
+        }
+        debounce(10);
+    }
+}
+
+/// Wait for specified milliseconds, servicing UART DMA
+fn debounce(ms: u32) {
+    let debounce_time = timer::millis() + ms as u64;
+    while timer::millis() < debounce_time {
+        uart::tick();
+    }
+}
+
+/// Convert u64 to decimal string, return number of bytes written
+///
+/// We implement this manually instead of using format!() because this is
+/// no_std code without allocator support. The format!() macro requires
+/// heap allocation via String, which is not available in bare-metal
+/// environments. This function writes directly to a pre-allocated buffer.
+fn format_u64(mut value: u64, buf: &mut [u8]) -> usize {
+    // Write digits in reverse order
+    let mut len = 0;
+    loop {
+        buf[len] = b'0' + (value % 10) as u8;
+        len += 1;
+        value /= 10;
+        if value == 0 {
+            break;
         }
     }
+
+    // Reverse the buffer to get correct digit order
+    buf[..len].reverse();
+
+    len
 }

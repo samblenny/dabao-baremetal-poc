@@ -7,6 +7,7 @@
 
 pub mod d11ctime;
 pub mod gpio;
+pub mod timer;
 pub mod uart;
 
 use core::arch::asm;
@@ -44,7 +45,10 @@ pub extern "C" fn _start() -> ! {
     }
 }
 
-/// Copy .data and zero .bss
+/// Initialize system state and peripherals at boot.
+///
+/// Copies .data section from FLASH to RAM, zeros .bss section, and
+/// initializes peripherals (timer and other drivers).
 fn init() {
     unsafe {
         // Copy .data section from FLASH to RAM
@@ -57,6 +61,9 @@ fn init() {
         let start = _bss_vma as *mut u8;
         let size = _bss_size as *const u8 as usize;
         core::ptr::write_bytes(start, 0, size);
+
+        // Initialize system timer
+        timer::init();
     }
 }
 
