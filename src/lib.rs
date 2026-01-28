@@ -5,9 +5,14 @@
 #![no_std]
 #![no_main]
 
+// System clock frequency (ACLK domain)
+pub const ACLK_HZ: u32 = 350_000_000;
+
 pub mod d11ctime;
 pub mod gpio;
-pub mod timer;
+pub mod interrupt;
+pub mod ticktimer;
+pub mod timer0;
 pub mod uart;
 
 use core::arch::asm;
@@ -19,7 +24,8 @@ unsafe extern "C" {
     fn _bss_vma(); //   Start .bss  in SRAM
     fn _data_size(); // Size of .data
     fn _bss_size(); //  Size of .bss
-    fn _ram_top();
+    fn __global_pointer();
+    fn _stack_base();
     fn main() -> !;
 }
 
@@ -34,9 +40,12 @@ pub extern "C" fn _start() -> ! {
     // Note: stack grows downward from the end of RAM.
     unsafe {
         asm!(
-            "mv sp, {0}",
+            "la gp, {gp_sym}", // load global pointer from linker script
+            "la sp, {sp_sym}",
             "addi sp, sp, -4",  // 4 byte DMA gutter
-            in(reg) _ram_top,   // get address from linker script
+            gp_sym = sym __global_pointer,
+            sp_sym = sym _stack_base,
+            options(nostack, nomem),
         );
         init();
         // Trick linker into keeping TEST_DATA
@@ -62,8 +71,14 @@ fn init() {
         let size = _bss_size as *const u8 as usize;
         core::ptr::write_bytes(start, 0, size);
 
+        // Initialize UART first so it's available for debug output
+        uart::init();
+
         // Initialize system timer
-        timer::init();
+        ticktimer::init();
+
+        // Initialize interrupt handler
+        interrupt::irq_setup();
     }
 }
 

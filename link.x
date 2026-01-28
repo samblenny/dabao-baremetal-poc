@@ -8,6 +8,8 @@ _data_lma = LOADADDR(.data);
 _data_size = SIZEOF(.data);
 _bss_size = SIZEOF(.bss);
 _ram_top = ORIGIN(RAM) + LENGTH(RAM);
+_scratch_stack = _ram_top; /* reserved for use by trap handler */
+_stack_base = _ram_top - 4K;
 
 ENTRY(_start)
 
@@ -16,6 +18,8 @@ SECTIONS {
     /* Mash read-only sections together for easy extraction with objcopy */
     .firmware : {
         *(.text._start)  /* initialization code MUST come first */
+        . = ALIGN(16);   /* _trap must be aligned or bad stuff will happen */
+        *(.text._trap)
         *(.text*)
         . = ALIGN(16);   /* 16 to make it look pretty in hexdump -C */
         *(.rodata*)
@@ -25,6 +29,7 @@ SECTIONS {
     /* This gets its own section to make the LMA & VMA addressing clear */
     .data : {
         _data_vma = .;
+        __global_pointer = . + 0x800; /* for initializing gp */
         KEEP(*(.data*))
         . = ALIGN(16);
     } > RAM AT > FLASH

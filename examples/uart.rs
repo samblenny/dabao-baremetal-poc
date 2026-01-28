@@ -4,15 +4,15 @@
 #![no_std]
 #![no_main]
 extern crate dabao_baremetal_poc;
-use dabao_baremetal_poc::{gpio, timer, uart};
+use dabao_baremetal_poc::{gpio, ticktimer, uart};
 use gpio::{AF, GpioPin};
 
 /// UART example for bao1x dabao evaluation board
 ///
-/// Initializes UART2 and demonstrates the timer module by repeatedly
+/// Initializes UART2 and demonstrates the ticktimer module by repeatedly
 /// printing "hello, world!" with the current millisecond timestamp
 /// (from the TICKTIMER peripheral). Waits for button press/release cycles
-/// on the PROG button (PC13) between prints, using timer::millis() for
+/// on the PROG button (PC13) between prints, using ticktimer::millis() for
 /// debouncing. Uses uart::tick() to service the DMA TX queue.
 #[unsafe(no_mangle)]
 pub extern "C" fn main() -> ! {
@@ -33,7 +33,7 @@ pub extern "C" fn main() -> ! {
         uart::write(b"hello, world! [millis() = ");
 
         // Get current time and convert to decimal string
-        let ms = timer::millis();
+        let ms = ticktimer::millis();
         let mut buf = [0u8; 20];
         let len = format_u64(ms, &mut buf);
 
@@ -57,8 +57,8 @@ pub extern "C" fn main() -> ! {
 
 /// Wait for specified milliseconds, servicing UART DMA
 fn debounce(ms: u32) {
-    let debounce_time = timer::millis() + ms as u64;
-    while timer::millis() < debounce_time {
+    let debounce_time = ticktimer::millis() + ms as u64;
+    while ticktimer::millis() < debounce_time {
         uart::tick();
     }
 }

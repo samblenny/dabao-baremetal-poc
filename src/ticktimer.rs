@@ -4,8 +4,6 @@
 //! TICKTIMER driver for bao1x dabao evaluation board
 //!
 //! Provides a system millisecond timer via the TICKTIMER peripheral.
-//! The hardware is referred to as TICKTIMER in documentation, but we use
-//! the shorter name "timer" in this module.
 //!
 //! # Overview
 //!
@@ -19,12 +17,12 @@
 //! can read the current time in milliseconds:
 //!
 //! ```ignore
-//! use dabao_baremetal_poc::timer;
+//! use dabao_baremetal_poc::ticktimer;
 //!
 //! fn main() {
-//!     let start = timer::millis();
+//!     let start = ticktimer::millis();
 //!     // ... do some work ...
-//!     let elapsed = timer::millis() - start;
+//!     let elapsed = ticktimer::millis() - start;
 //! }
 //! ```
 //!
@@ -56,9 +54,8 @@ const TICKTIMER_TIME0: *const u32 = 0xe001b008 as *const u32;
 const TICKTIMER_TIME1: *const u32 = 0xe001b004 as *const u32;
 const TICKTIMER_CLOCKS_PER_TICK: *mut u32 = 0xe001b020 as *mut u32;
 
-// Clock configuration
-const ACLK_HZ: u32 = 350_000_000;
-const CLOCKS_PER_MS: u32 = ACLK_HZ / 1000;
+// Calculate clocks per millisecond from system clock frequency
+const CLOCKS_PER_MS: u32 = crate::ACLK_HZ / 1000;
 
 // ============================================================================
 // Public API
@@ -66,7 +63,7 @@ const CLOCKS_PER_MS: u32 = ACLK_HZ / 1000;
 
 /// Initialize the timer for 1 millisecond tick rate.
 ///
-/// Sets CLOCKS_PER_TICK to 350,000 so that at 350 MHz ACLK, the timer
+/// Sets CLOCKS_PER_TICK to (ACLK_HZ / 1000) so that the timer
 /// increments once per millisecond. Must be called once at boot time
 /// before any code calls `millis()`.
 ///
