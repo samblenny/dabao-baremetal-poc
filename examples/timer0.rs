@@ -1,6 +1,34 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright 2026 Sam Blenny
-//
+//!
+//! TIMER0 interrupt callback example for bao1x dabao evaluation board
+//!
+//! Demonstrates using TIMER0 with interrupt-driven callbacks. Press the PROG
+//! button (PC13) to trigger a 2-second timer. When the timer fires, the
+//! callback runs in interrupt context and prints "boop" with the current time.
+//!
+//! # Hardware Setup
+//!
+//! - PC13: PROG button (hardwired, active low with pull-up)
+//! - TIMER0: Counts down at ACLK (350 MHz), fires interrupt at zero
+//!
+//! # Output Example
+//!
+//! ```text
+//! beep 5799...boop 7798
+//! beep 12224...boop 14224
+//! ```
+//!
+//! First "beep" prints at startup. "boop" fires ~2000ms later via interrupt
+//! callback. Subsequent beep/boop pairs are triggered by button presses.
+//!
+//! # Key Points
+//!
+//! - Callback runs in interrupt context - keep it short!
+//! - timer0::set_alarm_ms() handles all initialization
+//! - uart::tick() services UART DMA while waiting for button
+//! - Timestamps show reliable interrupt timing
+
 #![no_std]
 #![no_main]
 extern crate dabao_baremetal_poc;
@@ -16,19 +44,19 @@ pub extern "C" fn main() -> ! {
     gpio::enable_pullup(GpioPin::PortC(gpio::PC13));
 
     loop {
-        // Print beep now (on boot and after each button press)
+        // Print timestamp and start timer for interrupt callback
         log!("beep {}...", millis());
 
-        // Set an alarm to print boop later using a callback function
-        timer0::set_alarm_ms(2000, boop);
+        // Arm 2-second alarm - callback will fire in interrupt context
+        timer0::set_alarm_ms(2000, alarm_callback);
 
-        // Wait until PC13 is high (button released)
+        // Wait for button release (active low, so 0=pressed, 1=released)
         while gpio::read_input(GpioPin::PortC(gpio::PC13)) == 0 {
             uart::tick();
         }
         sleep(10);
 
-        // Wait until PC13 is low (button pressed)
+        // Wait for button press
         while gpio::read_input(GpioPin::PortC(gpio::PC13)) != 0 {
             uart::tick();
         }
@@ -36,7 +64,11 @@ pub extern "C" fn main() -> ! {
     }
 }
 
-/// Callback to handle the alarm interupt (runs in interrupt context!)
-pub fn boop() {
+/// Callback invoked when TIMER0 alarm fires (runs in interrupt context!)
+///
+/// This runs in interrupt context, so it must be fast and avoid blocking.
+/// The callback is stored in timer0 and invoked by the trap handler when
+/// the timer reaches zero.
+fn alarm_callback() {
     log!("boop {}\r\n", millis());
 }
