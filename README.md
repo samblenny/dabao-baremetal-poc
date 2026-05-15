@@ -2,6 +2,9 @@
 <!-- SPDX-FileCopyrightText: Copyright 2026 Sam Blenny -->
 # Baochip SDK
 
+[**UPDATE 2026-05-15**: If you want a much more complete C SDK for Dabao, check
+out https://github.com/armstrongsubero/dabao-sdk]
+
 This is a baremetal SDK for the Baochip Dabao Bao1x evaluation board. Most of
 the work here is about peripheral drivers, linker scripts, firmware blob
 signing, and examples to demonstrate driver usage. The strategy here is to do
